@@ -118,9 +118,9 @@ void upgradeFile(string fileName, bool dip64, bool dip65, bool dip1003)
 	import std.functional : toDelegate;
 
 	File input = File(fileName, "rb");
+	scope (exit) input.close();
 	ubyte[] inputBytes = uninitializedArray!(ubyte[])(cast(size_t) input.size);
 	input.rawRead(inputBytes);
-	input.close();
 	StringCache cache = StringCache(StringCache.defaultBucketCount);
 	LexerConfig config;
 	config.fileName = fileName;
@@ -140,6 +140,7 @@ void upgradeFile(string fileName, bool dip64, bool dip65, bool dip1003)
 	}
 
 	File output = File(fileName, "wb");
+	scope (exit) output.close();
 	auto visitor = new DFixVisitor;
 	visitor.visit(mod);
 	relocateMarkers(visitor.markers, tokens);
